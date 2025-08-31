@@ -1,14 +1,7 @@
-# 🚢 AIS Track Analysis System
-
-AIS(Automatic Identification System) 데이터를 활용한 선박 추적 및 분석 시스템입니다.  
-CNN-LSTM, 오리지널 LSTM, VQ-LSTM, TCN 기반 선박 분류와 VAE 기반 이상 탐지 기능을 제공합니다.
-
----
-
 # 🚢 AIS Track Analysis System (English Version)
 
 AIS (Automatic Identification System) data-based vessel tracking and analysis system.  
-Provides vessel classification based on CNN-LSTM, Original LSTM, VQ-LSTM, TCN, and anomaly detection using VAE.
+Provides vessel classification based on CNN-LSTM, TCN, and anomaly detection using VAE.
 
 ## 📋 Project Overview
 
