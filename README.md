@@ -141,11 +141,6 @@ Options:
   --triplet_margin FLOAT              Triplet loss margin (default: 1.0)
   --contrastive_temperature FLOAT     Contrastive loss temperature (default: 0.07)
   --combined_weight FLOAT             Combined loss weight (default: 0.5)
-  --vq_commitment_cost FLOAT          VQ-LSTM commitment cost (default: 0.01)
-  --vq_loss_weight FLOAT             VQ loss weight (default: 0.001)
-  --vq_warmup_epochs INT             VQ loss weight warmup epochs (default: 10)
-  --num_embeddings INT               VQ codebook size (default: 16)
-  --embedding_dim INT                VQ embedding dimension (default: 8)
   --device {auto,cuda,cpu}           Computing device selection (default: auto)
   --split_path PATH                   Split indices file path
   --test_only                         Run test only without training if checkpoints exist
@@ -158,9 +153,6 @@ python main_unified.py --csv_path combined_output.csv --epochs 100
 
 # Original LSTM Classification
 python main_unified.py --model_type original_lstm --csv_path combined_output.csv
-
-# VQ-LSTM Classification
-python main_unified.py --model_type vq_lstm --csv_path combined_output.csv
 
 # TCN Classification (Basic)
 python main_unified.py --model_type tcn --csv_path combined_output.csv
@@ -205,18 +197,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 - **Input**: 5 features (latitude, longitude, speed, course, heading)
 - **Structure**: LSTM → Classifier
 - **Features**: Pure LSTM for time-series pattern learning
-
-### VQ-LSTM Model
-- **Purpose**: MMSI-based vessel classification
-- **Input**: 5 features (latitude, longitude, speed, course, heading)
-- **Structure**: LSTM → Vector Quantizer → Classifier
-- **Features**: More efficient embedding learning through Vector Quantization
-
-### VQ Bottleneck LSTM Model
-- **Purpose**: MMSI-based vessel classification
-- **Input**: 5 features (latitude, longitude, speed, course, heading)
-- **Structure**: CNN → VQ Bottleneck → LSTM → Classifier
-- **Features**: Information compression and noise removal through semantic abstraction
 
 ### Dual Stream LSTM Model
 - **Purpose**: MMSI-based vessel classification
@@ -342,10 +322,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 | Model | Features | Advantages | Disadvantages |
 |-------|----------|------------|---------------|
 | **CNN-LSTM** | Spatial + Temporal patterns | Complex pattern learning | High parameter count |
-| **Original LSTM** | Pure time-series | Simple and fast | Limited spatial patterns |
-| **VQ-LSTM** | Quantized embeddings | Efficient representation | High learning complexity |
-| **VQ Bottleneck LSTM** | Semantic abstraction | Noise removal, interpretability | Potential information loss |
-| **Dual Stream LSTM** | Complementary feature learning | Robust learning | Complex structure |
 | **TCN** | Dilated convolution | Parallel processing, long sequences | Limited local patterns |
 | **Dilated Residual TCN** | LayerNorm + Residual | Stable learning, deep networks | Increased parameter count |
 | **Attention TCN** | TCN + Attention | Focus on important time points | Increased computational complexity |
@@ -368,11 +344,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 ### Checkpoint Load Failure
 - Check file path
 - Check model structure compatibility
-
-### VQ-LSTM Training Considerations
-- `commitment_cost` adjustment may be necessary
-- Monitor perplexity values
-- Balance VQ loss and classification loss
 
 ### TCN Model Training Considerations
 - **TCN**: Adjust kernel_size and num_channels for performance improvement
@@ -413,17 +384,13 @@ CNN-LSTM, 오리지널 LSTM, VQ-LSTM, TCN 기반 선박 분류와 VAE 기반 이
 ## 📋 프로젝트 개요
 
 ### 🎯 주요 기능
-- **선박 분류 (Classification)**: CNN-LSTM, 오리지널 LSTM, VQ-LSTM, TCN을 사용한 MMSI별 선박 식별
+- **선박 분류 (Classification)**: CNN-LSTM, TCN을 사용한 MMSI별 선박 식별
 - **이상 탐지 (Anomaly Detection)**: VAE를 사용한 비정상 선박 행동 탐지
 - **다양한 손실 함수**: Cross Entropy, Triplet Loss, Contrastive Loss, Combined Loss 지원
 - **시각화**: Confusion Matrix, t-SNE 임베딩, 재구성 오차 분포 등
 
 ### 🏗️ 아키텍처
 - **CNN-LSTM**: 시계열 AIS 데이터의 공간적/시간적 패턴 학습
-- **오리지널 LSTM**: 순수 LSTM 기반 시계열 패턴 학습
-- **VQ-LSTM**: Vector Quantization이 적용된 LSTM으로 더 효율적인 임베딩 학습
-- **VQ Bottleneck LSTM**: CNN-VQ-LSTM 구조로 semantic abstraction을 통한 정보 압축
-- **Dual Stream LSTM**: CNN-LSTM과 VQ-LSTM을 결합한 보완적 특성 학습
 - **TCN (Temporal Convolutional Network)**: Dilated convolution 기반 시계열 모델링
 - **Dilated Residual TCN**: Layer Normalization이 추가된 개선된 TCN
 - **Attention TCN**: Multi-head Attention이 결합된 TCN
@@ -459,18 +426,6 @@ python main_unified.py --csv_path your_data.csv
 
 #### 다른 모델로 분류
 ```bash
-# 오리지널 LSTM
-python main_unified.py --model_type original_lstm --csv_path your_data.csv
-
-# VQ-LSTM
-python main_unified.py --model_type vq_lstm --csv_path your_data.csv
-
-# VQ Bottleneck LSTM (CNN-VQ-LSTM)
-python main_unified.py --model_type vq_bottleneck_lstm --csv_path your_data.csv
-
-# Dual Stream LSTM (CNN-LSTM + VQ-LSTM)
-python main_unified.py --model_type dual_stream_lstm --csv_path your_data.csv
-
 # TCN (기본)
 python main_unified.py --model_type tcn --csv_path your_data.csv
 
@@ -526,7 +481,7 @@ python main_unified.py [OPTIONS]
 
 Options:
   --mode {classification,anomaly}     분석 모드 (기본값: classification)
-  --model_type {cnn_lstm,original_lstm,vq_lstm,vq_bottleneck_lstm,dual_stream_lstm,tcn,dilated_residual_tcn,attention_tcn,tcn_transformer,graph_tcn}  모델 타입 (기본값: tcn)
+  --model_type {cnn_lstm,original_lstm,tcn,dilated_residual_tcn,attention_tcn,tcn_transformer,graph_tcn}  모델 타입 (기본값: tcn)
   --csv_path PATH                     AIS 데이터 CSV 파일 경로
   --epochs INT                        학습 에포크 수 (기본값: 80)
   --beta FLOAT                        VAE KL 손실 가중치 (기본값: 0.1)
@@ -541,11 +496,6 @@ Options:
   --triplet_margin FLOAT              Triplet loss margin (기본값: 1.0)
   --contrastive_temperature FLOAT     Contrastive loss temperature (기본값: 0.07)
   --combined_weight FLOAT             Combined loss weight (기본값: 0.5)
-  --vq_commitment_cost FLOAT          VQ-LSTM commitment cost (기본값: 0.01)
-  --vq_loss_weight FLOAT             VQ 손실 가중치 (기본값: 0.001)
-  --vq_warmup_epochs INT             VQ loss weight warmup epochs (기본값: 10)
-  --num_embeddings INT               VQ codebook size (기본값: 16)
-  --embedding_dim INT                VQ embedding dimension (기본값: 8)
   --device {auto,cuda,cpu}           연산 디바이스 선택 (기본값: auto)
   --split_path PATH                   분할 인덱스 파일 경로
   --test_only                         체크포인트가 있으면 학습 없이 테스트만 실행
@@ -555,12 +505,6 @@ Options:
 ```bash
 # CNN-LSTM 분류 (기본)
 python main_unified.py --csv_path combined_output.csv --epochs 100
-
-# 오리지널 LSTM 분류
-python main_unified.py --model_type original_lstm --csv_path combined_output.csv
-
-# VQ-LSTM 분류
-python main_unified.py --model_type vq_lstm --csv_path combined_output.csv
 
 # TCN 분류 (기본)
 python main_unified.py --model_type tcn --csv_path combined_output.csv
