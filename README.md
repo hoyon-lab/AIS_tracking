@@ -6,20 +6,16 @@ Provides vessel classification based on CNN-LSTM, TCN, and anomaly detection usi
 ## 📋 Project Overview
 
 ### 🎯 Key Features
-- **Vessel Classification**: MMSI-based vessel identification using CNN-LSTM, Original LSTM, VQ-LSTM, TCN
+- **Vessel Classification**: MMSI-based vessel identification using CNN-LSTM, DRC-TCN
 - **Anomaly Detection**: Abnormal vessel behavior detection using VAE
 - **Various Loss Functions**: Support for Cross Entropy, Triplet Loss, Contrastive Loss, Combined Loss
 - **Visualization**: Confusion Matrix, t-SNE embeddings, reconstruction error distribution, etc.
 
 ### 🏗️ Architecture
 - **CNN-LSTM**: Learning spatial and temporal patterns from time-series AIS data
-- **Original LSTM**: Pure LSTM-based time-series pattern learning
-- **VQ-LSTM**: LSTM with Vector Quantization for more efficient embedding learning
-- **VQ Bottleneck LSTM**: CNN-VQ-LSTM structure for information compression through semantic abstraction
-- **Dual Stream LSTM**: Complementary feature learning by combining CNN-LSTM and VQ-LSTM
 - **TCN (Temporal Convolutional Network)**: Time-series modeling based on dilated convolution
 - **Dilated Residual TCN**: Improved TCN with Layer Normalization
-- **Attention TCN**: TCN combined with Multi-head Attention
+- **Attention TCN**: TCN combined with Multi-head Attentionhttps://github.com/hoyon-lab/AIS_tracking
 - **TCN-Transformer**: TCN + Transformer Hybrid model
 - **Graph TCN**: TCN combined with Graph Convolution
 - **MS-TCN-RF**: Multi-Scale TCN with Receptive Field Search (capturing both long and short-term patterns)
@@ -54,15 +50,6 @@ python main_unified.py --csv_path your_data.csv
 ```bash
 # Original LSTM
 python main_unified.py --model_type original_lstm --csv_path your_data.csv
-
-# VQ-LSTM
-python main_unified.py --model_type vq_lstm --csv_path your_data.csv
-
-# VQ Bottleneck LSTM (CNN-VQ-LSTM)
-python main_unified.py --model_type vq_bottleneck_lstm --csv_path your_data.csv
-
-# Dual Stream LSTM (CNN-LSTM + VQ-LSTM)
-python main_unified.py --model_type dual_stream_lstm --csv_path your_data.csv
 
 # TCN (Basic)
 python main_unified.py --model_type tcn --csv_path your_data.csv
@@ -119,7 +106,7 @@ python main_unified.py [OPTIONS]
 
 Options:
   --mode {classification,anomaly}     Analysis mode (default: classification)
-  --model_type {cnn_lstm,original_lstm,vq_lstm,vq_bottleneck_lstm,dual_stream_lstm,tcn,dilated_residual_tcn,attention_tcn,tcn_transformer,graph_tcn}  Model type (default: tcn)
+  --model_type {cnn_lstm,tcn,dilated_residual_tcn,attention_tcn,tcn_transformer,graph_tcn}  Model type (default: tcn)
   --csv_path PATH                     AIS data CSV file path
   --epochs INT                        Number of training epochs (default: 80)
   --beta FLOAT                        VAE KL loss weight (default: 0.1)
@@ -184,18 +171,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 - **Input**: 5 features (latitude, longitude, speed, course, heading)
 - **Structure**: CNN → LSTM → Classifier
 - **Features**: Learning both spatial patterns and temporal dependencies
-
-### Original LSTM Model
-- **Purpose**: MMSI-based vessel classification
-- **Input**: 5 features (latitude, longitude, speed, course, heading)
-- **Structure**: LSTM → Classifier
-- **Features**: Pure LSTM for time-series pattern learning
-
-### Dual Stream LSTM Model
-- **Purpose**: MMSI-based vessel classification
-- **Input**: 5 features (latitude, longitude, speed, course, heading)
-- **Structure**: CNN-LSTM (Stream A) + VQ-LSTM (Stream B) → Feature Fusion → Classifier
-- **Features**: Complementary learning of continuous dynamics and discrete semantics
 
 ### VAE Anomaly Detection Model
 - **Purpose**: Abnormal vessel behavior detection
@@ -274,7 +249,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 ### Core Files
 - `main_unified.py`: Main execution file
 - `cnn_lstm_model.py`: CNN-LSTM classification model
-- `lstm_models.py`: Original LSTM, VQ-LSTM models
 - `va_vae_model.py`: VAE anomaly detection model
 - `requirements.txt`: Dependency package list
 
@@ -300,8 +274,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 2. **Sequence Generation**: Fixed-length sequences of 50 points
 3. **Model-specific Processing**:
    - **CNN-LSTM**: CNN → LSTM → Classification
-   - **Original LSTM**: LSTM → Classification
-   - **VQ-LSTM**: LSTM → Vector Quantizer → Classification
 4. **Classification**: MMSI-based vessel prediction
 
 ### Anomaly Detection (VAE)
@@ -372,7 +344,7 @@ Bug reports and feature suggestions are always welcome!
 # 🚢 AIS Track Analysis System (한국어 버전)
 
 AIS(Automatic Identification System) 데이터를 활용한 선박 추적 및 분석 시스템입니다.  
-CNN-LSTM, 오리지널 LSTM, VQ-LSTM, TCN 기반 선박 분류와 VAE 기반 이상 탐지 기능을 제공합니다.
+CNN-LSTM, TCN 기반 선박 분류와 VAE 기반 이상 탐지 기능을 제공합니다.
 
 ## 📋 프로젝트 개요
 
@@ -537,30 +509,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 - **구조**: CNN → LSTM → 분류기
 - **특징**: 공간적 패턴과 시간적 의존성을 모두 학습
 
-### 오리지널 LSTM 모델
-- **목적**: MMSI별 선박 분류
-- **입력**: 5개 특성 (위도, 경도, 속도, 방향, 헤딩)
-- **구조**: LSTM → 분류기
-- **특징**: 순수 LSTM으로 시계열 패턴 학습
-
-### VQ-LSTM 모델
-- **목적**: MMSI별 선박 분류
-- **입력**: 5개 특성 (위도, 경도, 속도, 방향, 헤딩)
-- **구조**: LSTM → Vector Quantizer → 분류기
-- **특징**: Vector Quantization으로 더 효율적인 임베딩 학습
-
-### VQ Bottleneck LSTM 모델
-- **목적**: MMSI별 선박 분류
-- **입력**: 5개 특성 (위도, 경도, 속도, 방향, 헤딩)
-- **구조**: CNN → VQ Bottleneck → LSTM → 분류기
-- **특징**: Semantic abstraction을 통한 정보 압축 및 잡음 제거
-
-### Dual Stream LSTM 모델
-- **목적**: MMSI별 선박 분류
-- **입력**: 5개 특성 (위도, 경도, 속도, 방향, 헤딩)
-- **구조**: CNN-LSTM (Stream A) + VQ-LSTM (Stream B) → Feature Fusion → 분류기
-- **특징**: 연속적 동역학과 이산적 의미론의 보완적 학습
-
 ### VAE 이상 탐지 모델
 - **목적**: 비정상 선박 행동 탐지
 - **입력**: 11개 특성 (기상 데이터 포함)
@@ -638,7 +586,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 ### 핵심 파일
 - `main_unified.py`: 메인 실행 파일
 - `cnn_lstm_model.py`: CNN-LSTM 분류 모델
-- `lstm_models.py`: 오리지널 LSTM, VQ-LSTM 모델
 - `va_vae_model.py`: VAE 이상 탐지 모델
 - `requirements.txt`: 의존성 패키지 목록
 
@@ -664,8 +611,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 2. **시퀀스 생성**: 50개 포인트 고정 길이 시퀀스
 3. **모델별 처리**:
    - **CNN-LSTM**: CNN → LSTM → 분류
-   - **오리지널 LSTM**: LSTM → 분류
-   - **VQ-LSTM**: LSTM → Vector Quantizer → 분류
 4. **분류**: MMSI별 선박 예측
 
 ### 이상탐지 (VAE)
@@ -679,10 +624,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 | 모델 | 특징 | 장점 | 단점 |
 |------|------|------|------|
 | **CNN-LSTM** | 공간적+시간적 패턴 | 복잡한 패턴 학습 | 파라미터 수 많음 |
-| **오리지널 LSTM** | 순수 시계열 | 단순하고 빠름 | 공간적 패턴 제한적 |
-| **VQ-LSTM** | 양자화된 임베딩 | 효율적인 표현 | 학습 복잡도 높음 |
-| **VQ Bottleneck LSTM** | Semantic abstraction | 잡음 제거, 해석 가능 | 정보 손실 가능성 |
-| **Dual Stream LSTM** | 보완적 특성 학습 | 강건한 학습 | 복잡한 구조 |
 | **TCN** | Dilated convolution | 병렬 처리, 긴 시퀀스 | 로컬 패턴 제한적 |
 | **Dilated Residual TCN** | LayerNorm + Residual | 안정적 학습, 깊은 네트워크 | 파라미터 수 증가 |
 | **Attention TCN** | TCN + Attention | 중요한 시점 집중 | 계산 복잡도 증가 |
@@ -705,11 +646,6 @@ MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,WDIR,WSPD,GST,PRES,ATMP,WTMP,...
 ### 체크포인트 로드 실패
 - 파일 경로 확인
 - 모델 구조 일치 여부 확인
-
-### VQ-LSTM 학습 시 주의사항
-- commitment_cost 조정 필요할 수 있음
-- perplexity 값 모니터링
-- VQ 손실과 분류 손실 균형 조정
 
 ### TCN 모델 학습 시 주의사항
 - **TCN**: kernel_size와 num_channels 조정으로 성능 향상
